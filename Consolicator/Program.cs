@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Consolicator
@@ -18,7 +19,9 @@ namespace Consolicator
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to Consolicator!\n\r");
+            Console.WriteLine("Welcome to Consolicator!");
+            Console.WriteLine();
+
             var calc = new Program();
             calc.Run();
         }
@@ -35,9 +38,10 @@ namespace Consolicator
                 {
                     Console.WriteLine("{0} = {1}", currentCalculationText, currentValue);
                     Console.WriteLine("Please expand the calculation ( + 1 ) or 'x' to exit:");
+                    Console.Write("{0}", currentValue);
                 }
 
-                var input = Console.ReadLine();
+                string input = Console.ReadLine();
                 stringOperation = CleanInput(input);
 
                 if (stringOperation == "x")
@@ -45,60 +49,102 @@ namespace Consolicator
                     break;
                 }
 
-                string operat = GetOperator(input);
+                string operat = GetOperator(stringOperation);
                 if (operat == string.Empty)
                 {
-                    Console.WriteLine("Invalid operator");
+                    Console.WriteLine("Invalid operator. You can use: | + | - | * | / | ^ | ! |");
                     Console.Clear();
                     Run();
                 }
 
-                firstNumber = GetFirstNumber(input, operat);
-                secondNumber = GetSecondNumber(input, operat);
+                firstNumber = GetFirstNumber(stringOperation, operat);
+                secondNumber = GetSecondNumber(stringOperation, operat);
+
+                bool parsedFirst = decimal.TryParse(firstNumber, out decimal firstDecimal);
+                bool parsedSecond = decimal.TryParse(secondNumber, out decimal secondDecimal);
 
                 switch (operat)
                 {
                     case "+":
-                        currentValue = Convert.ToDecimal(firstNumber) + Convert.ToDecimal(secondNumber);
-                        currentCalculationText += string.Format("{0} + {1}", firstOperation ? firstNumber : string.Empty, secondNumber);
+                        if (parsedFirst && parsedSecond)
+                        {
+                            currentValue = firstDecimal + secondDecimal;
+                            CalculationHistory(firstNumber, operat, secondNumber);
+                        }
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     case "-":
-                        currentValue = Convert.ToDecimal(firstNumber) - Convert.ToDecimal(secondNumber);
-                        currentCalculationText += string.Format("{0} - {1}", firstNumber, secondNumber);
+                        if (parsedFirst && parsedSecond)
+                        {
+                            currentValue = firstDecimal - secondDecimal;
+                            CalculationHistory(firstNumber, operat, secondNumber);
+                        }
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     case "*":
-                        currentValue = Convert.ToDecimal(firstNumber) * Convert.ToDecimal(secondNumber);
-                        currentCalculationText += string.Format("{0} * {1}", firstNumber, secondNumber);
+                        if (parsedFirst && parsedSecond)
+                        {
+                            currentValue = firstDecimal * secondDecimal;
+                            CalculationHistory(firstNumber, operat, secondNumber);
+                        }
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     case "/":
-                        if (secondNumber == "0")
+                        if (parsedFirst && parsedSecond)
                         {
-                            Console.WriteLine("Cannot divide by zero");
-                            Console.Clear();
-                            Run();
+                            if (secondNumber == "0")
+                            {
+                                ErrorReRun("Cannot divide by zero.", true);
+                            }
+
+                            currentValue = firstDecimal / secondDecimal;
+                            CalculationHistory(firstNumber, operat, secondNumber);
                         }
-                        currentValue = Convert.ToDecimal(firstNumber) / Convert.ToDecimal(secondNumber);
-                        currentCalculationText += string.Format("{0} / {1}", firstNumber, secondNumber);
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     case "!":
-                        if (Convert.ToInt32(firstNumber) < 0)
+                        if (parsedFirst)
                         {
-                            Console.WriteLine("Cannot calculate factorial of negative number");
-                            Console.Clear();
-                            Run();
+                            if (firstDecimal < 0)
+                            {
+                                ErrorReRun("Cannot calculate factorial of negative number.", true);
+                            }
+
+                            currentValue = CalculateFactorial(Convert.ToInt32(firstDecimal));
+                            CalculationHistory(firstNumber, operat, string.Empty);
                         }
-                        currentValue = CalculateFactorial(Convert.ToInt32(firstNumber));
-                        currentCalculationText += string.Format("!{0}", firstNumber);
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     case "^":
-                        if (Convert.ToInt32(secondNumber) < 0)
+                        if(parsedFirst && parsedSecond)
                         {
-                            Console.WriteLine("Cannot calculate power of negative number");
-                            Console.Clear();
-                            Run();
+                            if (secondDecimal < 0)
+                            {
+                                ErrorReRun("Cannot calculate power of negative number.", true);
+                            }
+
+                            currentValue = Convert.ToDecimal(Math.Pow(Convert.ToDouble(firstDecimal), Convert.ToDouble(secondDecimal)));
+                            CalculationHistory(firstNumber, operat, string.Empty);
                         }
-                        currentValue = Convert.ToDecimal(Math.Pow(Convert.ToDouble(firstNumber), Convert.ToDouble(secondNumber)));
-                        currentCalculationText += string.Format("{0} ^ {1}", firstNumber, secondNumber);
+                        else
+                        {
+                            ErrorReRun("The number is not correct.", true);
+                        }
                         break;
                     default:
                         Console.WriteLine("Invalid operator");
@@ -107,6 +153,23 @@ namespace Consolicator
 
                 firstOperation = false;
                 Console.Clear();
+            }
+        }
+
+        private void CalculationHistory(string firstNumber, string operat, string secondNumber)
+        {
+            currentCalculationText += string.Format("{0} {1} {2}", firstOperation ? firstNumber : string.Empty, operat, secondNumber);
+        }
+
+        private void ErrorReRun(string message, bool reRun)
+        {
+            Console.WriteLine(message);
+            Thread.Sleep(2000);
+            
+            if (reRun)
+            {
+                Console.Clear();
+                Run();
             }
         }
 
@@ -127,10 +190,10 @@ namespace Consolicator
                 return "x";
             }
 
-            var result = input.Replace(" ", string.Empty);
+            string result = input.Replace(" ", string.Empty);
             result = result.Replace("(", string.Empty);
             result = result.Replace(")", string.Empty);
-            result = Regex.Replace(result, @"[a-yA-YzZ]", string.Empty);
+            result = Regex.Replace(result, @"[a-zA-Z]", string.Empty);
             return result;
         }
 
@@ -164,19 +227,22 @@ namespace Consolicator
 
         private string GetFirstNumber(string input, string operat)
         {
-            var index = input.IndexOf(operat);
-            var result = input.Substring(0, index);
-            if (result == string.Empty)
+            if (!firstOperation)
             {
                 return currentValue.ToString();
             }
+
+            int index = input.IndexOf(operat);
+            string result = input.Substring(0, index);
+            
             return result;
         }
 
         private string GetSecondNumber(string input, string operat)
         {
-            var index = input.IndexOf(operat);
-            var result = input.Substring(index + 1, input.Length - index - 1);
+            int index = input.IndexOf(operat);
+            string result = input.Substring(index + 1, input.Length - index - 1);
+
             return result;
         }
     }
