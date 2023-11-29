@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Consolicator
 {
@@ -18,12 +19,23 @@ namespace Consolicator
             void Calculate()
             {
 
-                var inputOne = Convert.ToString(Console.ReadLine());
+                string inputOne = Convert.ToString(Console.ReadLine()); // eingabe machen und dann saeubern
+                inputOne = CleanInput("", " ");
+                string CleanInput(string str, string replacement)
+                {
+                    return str.Replace(str, replacement);
+                }
+                Console.WriteLine(inputOne);
+
                 string[] input = inputOne.Split(' ');
 
                 char[] operators = { '+', '-', '*', '/', '!', '^' };
                 int[] numbers = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-
+                //tryparse
+                //while eingabe nicht x
+                //tolower x
+                //for schleifen weg
+                //leertasten cleaninput methode erstellen
                 if (!string.IsNullOrEmpty(inputOne)) // kontrolliert, ob ueberhaupt etwas eingegeben wurde
                 {
                     int sum = 0;
