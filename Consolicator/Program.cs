@@ -73,7 +73,8 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     case "-":
@@ -84,7 +85,7 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     case "*":
@@ -95,7 +96,7 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     case "/":
@@ -103,7 +104,7 @@ namespace Consolicator
                         {
                             if (secondNumber == "0")
                             {
-                                ErrorReRun("Cannot divide by zero.", true);
+                                ErrorReRun("Cannot divide by zero.");
                             }
 
                             currentValue = firstDecimal / secondDecimal;
@@ -111,7 +112,7 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     case "!":
@@ -119,7 +120,7 @@ namespace Consolicator
                         {
                             if (firstDecimal < 0)
                             {
-                                ErrorReRun("Cannot calculate factorial of negative number.", true);
+                                ErrorReRun("Cannot calculate factorial of negative number.");
                             }
 
                             currentValue = CalculateFactorial(Convert.ToInt32(firstDecimal));
@@ -127,7 +128,7 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     case "^":
@@ -135,7 +136,7 @@ namespace Consolicator
                         {
                             if (secondDecimal < 0)
                             {
-                                ErrorReRun("Cannot calculate power of negative number.", true);
+                                ErrorReRun("Cannot calculate power of negative number.");
                             }
 
                             currentValue = Convert.ToDecimal(Math.Pow(Convert.ToDouble(firstDecimal), Convert.ToDouble(secondDecimal)));
@@ -143,7 +144,7 @@ namespace Consolicator
                         }
                         else
                         {
-                            ErrorReRun("The number is not correct.", true);
+                            ErrorReRun("The number is not correct.");
                         }
                         break;
                     default:
@@ -158,10 +159,11 @@ namespace Consolicator
 
         private void CalculationHistory(string firstNumber, string operat, string secondNumber)
         {
-            currentCalculationText += string.Format("{0} {1} {2}", firstOperation ? firstNumber : string.Empty, operat, secondNumber);
+            // formulate the if statement to check if the first number is null
+            currentCalculationText += string.Format("{0} {1} {2}", (firstOperation ? firstNumber : string.Empty), operat, secondNumber);
         }
 
-        private void ErrorReRun(string message, bool reRun)
+        private void ErrorReRun(string message, bool reRun = true)
         {
             Console.WriteLine(message);
             Thread.Sleep(2000);
