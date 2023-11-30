@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -13,101 +15,126 @@ namespace Consolicator
     {
         static void Main(string[] args)
         {
+
             Console.WriteLine("Welcome to Consolicator!\nPlease type an operation or x to exit:");
 
-            Calculate();
-            void Calculate()
+            string inputOne = Console.ReadLine();
+            string cleanedInput = inputOne.Replace(" ", "");
+
+
+            if (!string.IsNullOrEmpty(cleanedInput)) // kontrolliert, ob ueberhaupt etwas eingegeben wurde
             {
 
-                string inputOne = Convert.ToString(Console.ReadLine()); // eingabe machen und dann saeubern
-                inputOne = CleanInput("", " ");
-                string CleanInput(string str, string replacement)
-                {
-                    return str.Replace(str, replacement);
-                }
-                Console.WriteLine(inputOne);
-
-                string[] input = inputOne.Split(' ');
-
-                char[] operators = { '+', '-', '*', '/', '!', '^' };
-                int[] numbers = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-                //tryparse
-                //while eingabe nicht x
-                //tolower x
-                //for schleifen weg
-                //leertasten cleaninput methode erstellen
-                if (!string.IsNullOrEmpty(inputOne)) // kontrolliert, ob ueberhaupt etwas eingegeben wurde
+                while (!cleanedInput.ToLower().Equals("x")) // solange eingabe nicht x ist
                 {
                     int sum = 0;
-                    if (inputOne.Equals("x"))
+                    char[] operators = { '+', '-', '*', '/', '^', '!' };
+                    int indexOperators = cleanedInput.IndexOfAny(operators);// sucht im input nach den index des operators
+                    int firstNumber = int.Parse(cleanedInput.Substring(0, indexOperators));// speichert die erste Zahl ab, indem er von index 0 bis indexoperator die zahl rausschreibt
+                    int length = cleanedInput.Length; // length of input
+                    int secondNumber = int.Parse(cleanedInput.Substring(indexOperators, length - indexOperators));//speichert die zweite Zahl ab, indem er von indexopoerator bis lastindex vom string die zahl rausschreibt
+
+                    string whichOperator = cleanedInput.Substring(indexOperators, 1);
+                    int lengthOfFirstNewNumber = length - (secondNumber - indexOperators);// used later to remove first number of the new input  
+
+                    if (Regex.IsMatch(cleanedInput, @"^\d")) // prueft, ob erste Stelle eine Zahl ist
                     {
-                        return;
-                    }
-                    for (int i = 0; i < numbers.Length; i++) // geht ganze zeit in schleife
-                    {
-                        if (numbers[i].ToString().Equals(input[0])) // kontrolliert das erster wert eine zahl ist
+
+
+
+
+
+                        //newInput.Remove(0, sumNumber);
+
+
+                        //int newSecondNumber = int.Parse(cleanedInput.Substring(newindex, length - newindex));
+
+                        switch (whichOperator)
                         {
-                            int newIntOne = Int32.Parse(input[0]);
-                            for (var j = 0; j < operators.Length; j++)
-                            {
-                                if (operators[j].ToString().Equals(input[1])) // kontrolliert, das zweite stelle ein operator ist
-                                {
-                                    int newIntTwo = Int32.Parse(input[2]);
+                            case "+":
+                                sum = firstNumber + secondNumber;
+                                break;
 
-                                    // funktionen erstellen, mit der input[0] mit dem entsprechenden operator mit input[2] kalkuliert wird
-                                    switch (operators[j])
-                                    {
-                                        case '+':
-                                            sum = newIntOne + newIntTwo;
-                                            break;
+                            case "-":
+                                sum = firstNumber - secondNumber;
+                                break;
 
-                                        case '-':
-                                            sum = newIntOne - newIntTwo;
-                                            break;
+                            case "*":
+                                sum = firstNumber * secondNumber;
+                                break;
 
-                                        case '*':
-                                            sum = newIntOne * newIntTwo;
-                                            break;
+                            case "/":
+                                sum = firstNumber / secondNumber;
+                                break;
 
-                                        case '/':
-                                            sum = newIntOne / newIntTwo;
-                                            break;
+                            case "^":
+                                sum = firstNumber ^ secondNumber;
+                                break;
 
-                                        case '^':
-                                            sum = newIntOne ^ newIntTwo;
-                                            break;
+                            //case "!":
+                            //    sum = firstNumber ! secondNumber;
+                            //    break;
 
-                                        //case '!':
-                                        default: 
-                                            throw new ArgumentException();
-                                    }
-
-                                }
-                                Console.WriteLine(sum);
-                                Retype(sum);
-                            }
+                            default:
+                                break;
 
                         }
+                        Console.Clear();
+                        Console.WriteLine($"{cleanedInput} = {sum}");
+                        Console.WriteLine(sum);
+                        Console.WriteLine("Please type an operation or x to exit:");
+
+                        cleanedInput = Console.ReadLine().Replace(" ", "");
 
                     }
+                    else if (!string.IsNullOrEmpty(cleanedInput)) // used when new input doesnt start with number, but contains a operator
+                    {
+                        cleanedInput.Remove(0, lengthOfFirstNewNumber);
+                        string newInput = cleanedInput.Substring(0, length - lengthOfFirstNewNumber);
+                        if (newInput.Contains("+") || newInput.Contains("-") || newInput.Contains("*") || newInput.Contains("/") || newInput.Contains("^") || newInput.Contains("!"))
+                        {
+                            switch (whichOperator)
+                            {
+                                case "+":
+                                    sum = firstNumber + secondNumber;
+                                    break;
 
-                }
-                else
-                {
-                    Console.WriteLine("Ausnahme spaeter hier");// weil nichts eingegeben wurde
+                                case "-":
+                                    sum = firstNumber - secondNumber;
+                                    break;
+
+                                case "*":
+                                    sum = firstNumber * secondNumber;
+                                    break;
+
+                                case "/":
+                                    sum = firstNumber / secondNumber;
+                                    break;
+
+                                case "^":
+                                    sum = firstNumber ^ secondNumber;
+                                    break;
+
+                                //case "!":
+                                //    sum = firstNumber ! secondNumber;
+                                //    break;
+
+                                default:
+                                    break;
+
+                            }
+                        }
+                    }
+
+
+                    //if it is there, cut out the first number of the new input and continue with the rest of the string
+                    //continue history => sum+newinput(which has been edited by removing first number)
+                    //fakultaet
+                    //place "sum"somewhere, where you can add on it 
                 }
             }
 
-            void Retype(int sum)
-            {
-                //sum so integrieren, dass neue eingaben darauf aufbauen
-                Console.WriteLine("Please type an operation or x to exit:");
-                Calculate();
-            }
-            
         }
+
     }
 }
-
-//switch case zu ! erstellen
-// numbers array umaendern, da man auch mehrstellige zahlen braucht
